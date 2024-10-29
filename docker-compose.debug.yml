@@ -1,0 +1,22 @@
+version: '3'
+services:
+  milestones_db:
+    extends:
+      file: docker-compose.yml
+      service: milestones_db
+  milestones_api:
+    extends:
+      file: docker-compose.yml
+      service: milestones_api
+    environment:
+      LOG_LEVEL: debug
+    command:
+      [
+        "sh",
+        "-c",
+        "python -Xfrozen_modules=off -m debugpy --wait-for-client --listen 0.0.0.0:5677 -m uvicorn app.main:app --reload --host 0.0.0.0 --port 80",
+      ]
+    ports:
+      - '80:80'
+      - '5677:5677'
+    entrypoint: /entrypoint.sh

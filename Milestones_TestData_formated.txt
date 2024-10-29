@@ -1,0 +1,6 @@
+first_name,last_name,work_email,personal_email,cell_phone,time_hire,time_start,time_birthday,employee_id,manager_id,cost_center_id,worker_type,department,manager_name,location,title,department_lead_id
+Gwendolyn,Choi,gwendolyn.choi@testclient.com,gwendolyn.choi@testpersonal.com,15005550006,1/1/15,1/1/15,1/1/90,1142,200401,21121,Employee,Sales-East-NY,Marion Hargett,"New York, NY","GM, Business Development East",200405
+Khari,Vaughn,khari.vaughn@testclient.com,khari.vaughn@testpersonal.com,11234567891,1/1/19,1/1/19,1/1/92,102256,200402,43020,Employee,Engineering,Kenny Ayers,"New York, NY",Software Engineer II,200405
+Reign,Pena,reign.pena@testclient.com,reign.pena@testpersonal.com,12345678912,1/1/19,1/1/19,1/1/94,200241,200403,33210,Employee,Account Managers,Lutz Leiding,"Hamburg, Germany","Lead Director, Client Strategy",200405
+Marcus,King,marcus.king@testclient.com,marcus.king@testpersonal.com,13456789123,1/1/19,1/1/19,1/1/96,200382,200404,21210,Employee,Sales-EU-HH,Lukas Fassbender,"Hamburg, Germany",Sr Director of Business Development DACH,200405
+Josh,Crowley,joshua.crowley@blueboard.com,josh.crowley@testpersonal.com,9166261647,1/1/23,1/1/23,1/1/88,200588,200405,12/23/58,Employee,Engineering,Jason Weiner,"Bend, OR",Software Engineer,200405

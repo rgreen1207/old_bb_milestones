@@ -1,0 +1,22 @@
+FROM python:3.11.4-slim-bullseye
+WORKDIR /app
+
+# gettext-base is to get envsubst
+RUN apt-get update \
+  && apt -y install gettext-base iputils-ping vim default-mysql-client python3-pymysql alembic cron curl \
+  && apt-get clean
+
+# DataDog
+# RUN pip install ddtrace
+# install dependencies first so that changes in application code do not invalidate
+# the cache of the layer with installed dependencies
+COPY requirements.txt ./
+# when pip install is here, docker caches all the pip dependencies
+RUN pip install -r requirements.txt
+# copy the application
+COPY app/ /app/app
+COPY ./migrations /app/migrations
+COPY alembic.ini /app
+COPY Docker/crontab /crontab
+COPY Docker/entrypoint_swarm.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh

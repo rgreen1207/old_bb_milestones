@@ -1,0 +1,16 @@
+[project]
+requires-python = ">=3.11"         # Support Python 3.11+.
+
+[tool.ruff]
+ignore = ["E501"]                  # E501 is to avoid checking for line-length violations
+
+select = [
+  "E",                             # pycodestyle
+  "F",                             # pyflakes
+  "UP",                            # pyupgrade
+  "Q",                             # flake8 quotes
+  "FIX"                            # flake8-fixme
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]           # Ignore `F401` violations in any __init__.py file

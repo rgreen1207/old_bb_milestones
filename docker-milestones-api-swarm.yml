@@ -1,0 +1,99 @@
+# This is the Docker stack file that describes the Milestones application
+#
+# Do a Docker login then:
+# docker stack deploy --compose-file docker-swarm.yml --with-registry-auth milestones
+#
+# Compose file deploy reference:
+# https://docs.docker.com/compose/compose-file/deploy/
+#
+# Docker stacks do not support .env files so env var substitution in this file is done during CI/CD
+#
+# If you omit the mode key or set it to ingress, the routing mesh is used.
+# https://docs.docker.com/engine/swarm/ingress/
+#
+version: '3.9'
+services:
+  api:
+    image: ${IMAGE_TAG}
+    deploy:
+      mode: replicated
+      replicas: ${REPLICAS}
+      restart_policy:
+        condition: on-failure
+      update_config:
+        parallelism: 2
+        delay: 15s
+        order: start-first
+      placement:
+        constraints:
+          - node.hostname != bb-prod-5
+          - node.hostname != bb-prod-6
+    environment:
+      ACCOUNT_SID: '${ACCOUNT_SID}'
+      ACCOUNT_TOKEN: '${ACCOUNT_TOKEN}'
+      ALEMBIC_INI_FILE: 'alembic.ini'
+      ALGORITHM: '${ALGORITHM}'
+      AWS_ACCESS_KEY_ID: '${AWS_ACCESS_KEY_ID}'
+      AWS_SECRET_ACCESS_KEY: '${AWS_SECRET_ACCESS_KEY}'
+      AWS_BUCKET_NAME: '${AWS_BUCKET_NAME}'
+      AWS_ROLE_ARN: 'arn:aws:iam::252606574785:role/milestones-app-user-${ENV}-role'
+      BASE_URL: 'https://milestones-dev.blueboard.app'
+      # No CRON env var
+      ENV: '${ENV}'
+      FERNET_KEY: '${FERNET_KEY}'
+      JWT_ENFORCED: 'False' # TODO this is temporary
+      LOG_LEVEL: debug
+      MYSQL_DATABASE: blueboard_milestones
+      MYSQL_HOSTNAME: '${MYSQL_HOSTNAME}'
+      MYSQL_PASSWORD: '${MYSQL_PASSWORD}'
+      MYSQL_PORT: 3306
+      MYSQL_USER: milestones
+      SECRET_KEY: '${SECRET_KEY}'
+      SPARKPOST_KEY: '${SPARKPOST_KEY}'
+      TEMPORARY_TOKEN: '${TEMPORARY_TOKEN}' # this is an experiment
+      TWILIO_FROM: '+16193299600'
+    networks:
+      - blueboard_${ENV}
+    ports:
+      - 8080:80
+    entrypoint: /entrypoint.sh # this is renamed from the swarm entrpoint script
+  worker:
+    image: ${IMAGE_TAG}
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      update_config:
+        parallelism: 1
+        delay: 15s
+        order: start-first
+      placement:
+        constraints:
+          - node.hostname != bb-prod-5
+          - node.hostname != bb-prod-6
+    environment:
+      # Most of these env vars are not needed by the worker instance per say, but are required by the app to start/run
+      ACCOUNT_SID: '${ACCOUNT_SID}'
+      ACCOUNT_TOKEN: '${ACCOUNT_TOKEN}'
+      ALGORITHM: '${ALGORITHM}'
+      CRON: 'true'
+      ENV: '${ENV}'
+      FERNET_KEY: '${FERNET_KEY}'
+      LOG_LEVEL: debug
+      MYSQL_DATABASE: blueboard_milestones
+      MYSQL_HOSTNAME: '${MYSQL_HOSTNAME}'
+      MYSQL_PASSWORD: '${MYSQL_PASSWORD}'
+      MYSQL_PORT: 3306
+      MYSQL_USER: milestones
+      SECRET_KEY: '${SECRET_KEY}'
+      SPARKPOST_KEY: '${SPARKPOST_KEY}'
+      TEMPORARY_TOKEN: '${TEMPORARY_TOKEN}' # TODO remove this once the /internal routes are callable w/o a token
+      TWILIO_FROM: '+16193299600'
+    networks:
+      - blueboard_${ENV}
+    entrypoint: /entrypoint.sh # this is renamed from the swarm entrpoint script
+
+networks:
+  blueboard_${ENV}:
+    external: true

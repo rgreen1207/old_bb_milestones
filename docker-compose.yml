@@ -1,0 +1,71 @@
+# For Docker testing, you can edit the Dockerfile then build/tag:
+#   docker build -t bullseye:test -f Docker/Dockerfile.milestones_api_localhost .
+# Then use the tagged image (below)
+
+version: '3'
+services:
+  milestones_db:
+    container_name: milestones_db
+    build:
+      context: .
+      dockerfile: Docker/Dockerfile.milestones_db
+
+    volumes:
+      - './mariadb-data/:/var/lib/mysql'
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_LOG_CONSOLE: "true"
+      MYSQL_DATABASE: blueboard_milestones
+      MYSQL_USER: milestones
+      MYSQL_PASSWORD: milestones
+    expose:
+      - 3306
+    ports:
+      - 3306:3306
+  milestones_api:
+    build:
+      context: .
+      dockerfile: Docker/Dockerfile.milestones_api_localhost
+    # You can also use existing image like this:
+    # image: blueboardinc/milestones_api:0.0.2
+    container_name: milestones_api
+    environment:
+      ACCOUNT_SID: ${ACCOUNT_SID}
+      ACCOUNT_TOKEN: ${ACCOUNT_TOKEN}
+      ALEMBIC_INI_FILE: "alembic.ini"
+      ALGORITHM: ${ALGORITHM}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_BUCKET_NAME: ${AWS_BUCKET_NAME}
+      AWS_ROLE_ARN: ${AWS_ROLE_ARN}
+      BASE_URL: "http://localhost:5173/"
+      # No CRON
+      DD_TRACE_ENABLED: "false" # Datadog is fully disabled
+      ENV: local
+      JWT_ENFORCED: "False"
+      LOG_LEVEL: debug
+      MYSQL_DATABASE: blueboard_milestones
+      MYSQL_HOSTNAME: milestones_db
+      MYSQL_PASSWORD: milestones
+      MYSQL_PORT: 3306
+      MYSQL_USER: milestones
+      SECRET_KEY: ${SECRET_KEY}
+      SPARKPOST_KEY: ${SPARKPOST_KEY}
+      TWILIO_FROM: "+16193299600"
+      FERNET_KEY: ${FERNET_KEY}
+    command:
+      [
+        "sh",
+        "-c",
+        "uvicorn app.main:app --proxy-headers --host 0.0.0.0 --port 80 --reload --use-colors",
+      ]
+    volumes:
+      - ./app:/app/app
+      - ./tests:/app/tests
+    ports:
+      - '80:80'
+    depends_on:
+      - milestones_db
+    entrypoint: /entrypoint.sh # use start-reload.sh as the entrypoint only if using tiangolo's Docker image in Dockerfile.milestones_api_deprecated
+    restart: always

@@ -1,0 +1,4 @@
+# Milestones cron jobs go here
+# * * * * * root /usr/bin/curl -A "milestones-cron" --header "Authorization: Bearer ${TEMPORARY_TOKEN}" --location http://127.0.0.1/v1/health > /dev/null 2>&1
+* * * * * root /usr/bin/curl -A "milestones-cron" --location http://127.0.0.1/blue/cron > /dev/null 2>&1
+# This file must end with a newline
